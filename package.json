@@ -1,0 +1,40 @@
+{
+  "name": "queue-client",
+  "version": "1.0.0",
+  "description": "Postgres-backed job queue client for Hermes and workers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:23489/git/kmease-ttc/queue-client"
+  },
+  "keywords": [
+    "queue",
+    "job-queue",
+    "postgres",
+    "worker"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@types/pg": "^8.16.0",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "arclo-contracts": "*"
+  },
+  "peerDependenciesMeta": {
+    "arclo-contracts": {
+      "optional": false
+    }
+  }
+}
