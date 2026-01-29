@@ -1,7 +1,7 @@
 {
   "name": "queue-client",
   "version": "1.0.0",
-  "description": "Postgres-backed job queue client for Hermes and workers",
+  "description": "Typed job queue client with zod-validated envelopes, in-memory and Postgres adapters",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -23,11 +23,19 @@
   "license": "ISC",
   "dependencies": {
     "pg": "^8.17.2",
-    "arclo-contracts": "file:../arclo-contracts"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
     "@types/pg": "^8.16.0",
     "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
   }
 }

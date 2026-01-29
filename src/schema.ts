@@ -9,6 +9,7 @@ export function getCreateTableSQL(schema: string, tableName: string): string {
 
     CREATE TABLE IF NOT EXISTS ${fullTableName} (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      trace_id VARCHAR(255) NOT NULL,
       type VARCHAR(255) NOT NULL,
       payload JSONB NOT NULL,
       status VARCHAR(50) NOT NULL DEFAULT 'pending',
@@ -35,6 +36,9 @@ export function getCreateTableSQL(schema: string, tableName: string): string {
     CREATE INDEX IF NOT EXISTS idx_${tableName}_worker_id
       ON ${fullTableName} (worker_id)
       WHERE worker_id IS NOT NULL;
+
+    CREATE INDEX IF NOT EXISTS idx_${tableName}_trace_id
+      ON ${fullTableName} (trace_id);
   `;
 }
 
@@ -44,8 +48,8 @@ export function getCreateTableSQL(schema: string, tableName: string): string {
 export function getInsertJobSQL(schema: string, tableName: string): string {
   return `
     INSERT INTO "${schema}"."${tableName}"
-      (type, payload, priority, max_attempts, scheduled_for)
-    VALUES ($1, $2, $3, $4, $5)
+      (type, payload, priority, max_attempts, scheduled_for, trace_id)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
   `;
 }
@@ -54,7 +58,7 @@ export function getInsertJobSQL(schema: string, tableName: string): string {
  * SQL to claim a job atomically using FOR UPDATE SKIP LOCKED
  */
 export function getClaimJobSQL(schema: string, tableName: string, hasTypes: boolean): string {
-  const typeFilter = hasTypes ? 'AND type = ANY($3)' : '';
+  const typeFilter = hasTypes ? 'AND type = ANY($2)' : '';
 
   return `
     UPDATE "${schema}"."${tableName}"
@@ -88,7 +92,6 @@ export function getCompleteJobSQL(schema: string, tableName: string): string {
       completed_at = NOW(),
       updated_at = NOW()
     WHERE id = $1
-      AND worker_id = $2
       AND status = 'processing'
     RETURNING *
   `;
@@ -109,7 +112,7 @@ export function getFailJobSQL(schema: string, tableName: string): string {
         WHEN attempts >= max_attempts THEN NOW()
         ELSE failed_at
       END,
-      error = $3,
+      error = $2,
       updated_at = NOW(),
       worker_id = CASE
         WHEN attempts >= max_attempts THEN worker_id
@@ -120,7 +123,6 @@ export function getFailJobSQL(schema: string, tableName: string): string {
         ELSE scheduled_for
       END
     WHERE id = $1
-      AND worker_id = $2
       AND status = 'processing'
     RETURNING *
   `;
