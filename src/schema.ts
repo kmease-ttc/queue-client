@@ -23,6 +23,7 @@ export function getCreateTableSQL(schema: string, tableName: string): string {
       completed_at TIMESTAMPTZ,
       failed_at TIMESTAMPTZ,
       error TEXT,
+      result JSONB,
       worker_id VARCHAR(255)
     );
 
@@ -89,6 +90,7 @@ export function getCompleteJobSQL(schema: string, tableName: string): string {
     UPDATE "${schema}"."${tableName}"
     SET
       status = 'completed',
+      result = $2::jsonb,
       completed_at = NOW(),
       updated_at = NOW()
     WHERE id = $1

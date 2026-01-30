@@ -26,6 +26,7 @@ export const JobEnvelopeSchema = z.object({
   completed_at: z.coerce.date().nullable(),
   failed_at: z.coerce.date().nullable(),
   error: z.string().nullable(),
+  result: z.record(z.string(), z.unknown()).nullable().optional(),
   worker_id: z.string().nullable(),
 });
 

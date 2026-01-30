@@ -42,6 +42,7 @@ function rowToEnvelope(row: Record<string, unknown>): JobEnvelope {
     completed_at: (row.completed_at as Date) ?? null,
     failed_at: (row.failed_at as Date) ?? null,
     error: (row.error as string) ?? null,
+    result: (row.result as Record<string, unknown>) ?? null,
     worker_id: (row.worker_id as string) ?? null,
   };
 }
@@ -116,12 +117,13 @@ export class PostgresAdapter implements QueueAdapter {
 
   async complete(
     jobId: string,
-    _result?: Record<string, unknown>,
+    result?: Record<string, unknown>,
   ): Promise<JobEnvelope | null> {
     const sql = getCompleteJobSQL(this.schema, this.tableName);
-    const result = await this.pool.query(sql, [jobId]);
-    if (result.rows.length === 0) return null;
-    return rowToEnvelope(result.rows[0]);
+    const resultJson = result ? JSON.stringify(result) : null;
+    const queryResult = await this.pool.query(sql, [jobId, resultJson]);
+    if (queryResult.rows.length === 0) return null;
+    return rowToEnvelope(queryResult.rows[0]);
   }
 
   async fail(jobId: string, error: string): Promise<JobEnvelope | null> {

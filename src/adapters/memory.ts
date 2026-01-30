@@ -61,7 +61,7 @@ export class MemoryAdapter implements QueueAdapter {
 
   async complete(
     jobId: string,
-    _result?: Record<string, unknown>,
+    result?: Record<string, unknown>,
   ): Promise<JobEnvelope | null> {
     const job = this.jobs.get(jobId);
     if (!job || job.status !== 'processing') return null;
@@ -70,6 +70,7 @@ export class MemoryAdapter implements QueueAdapter {
     const updated: JobEnvelope = {
       ...job,
       status: 'completed',
+      result: result ?? null,
       completed_at: now,
       updated_at: now,
     };
